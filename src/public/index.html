@@ -1,0 +1,459 @@
+﻿<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TaxMate</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="modal" id="notice-modal">
+      <div class="modal-card">
+        <h2>알림</h2>
+        <p>
+          본 서비스는 간편한 추정 계산을 위해 업종별 평균 간이과세율을
+          사용합니다. 실제 신고와는 % 차이가 있을 수 있습니다.
+        </p>
+        <label class="modal-label" for="notice-tax-select">계산할 세금 선택</label>
+        <select id="notice-tax-select">
+          <option value="vat">부가세</option>
+          <option value="income">소득세</option>
+          <option value="labor">근로소득세</option>
+          <option value="tax">종합소득세(간편)</option>
+          <option value="refund">환급/추가 납부</option>
+          <option value="corporate">법인세</option>
+          <option value="sole">개인사업자 소득세</option>
+        </select>
+        <button class="primary" id="notice-confirm" type="button">확인</button>
+      </div>
+    </div>
+    <div class="bg-orbit"></div>
+    <div class="wrap">
+      <header class="hero">
+        <div class="pill">MVP 웹</div>
+        <h1>Tax Mate</h1>
+        <p>두 가지 모드로 빠르게 계산하고 결과를 확인하세요.</p>
+        <div class="mode-switch">
+          <button class="mode-btn active" data-mode="simple">
+            간편 계산
+          </button>
+</div>
+      </header>
+
+      <main>
+        <section class="mode-panel active" id="mode-simple">
+          <div class="tax-tabs">
+            <button class="tax-btn active" data-tax="vat">부가세</button>
+            <button class="tax-btn" data-tax="income">소득세</button>
+            <button class="tax-btn" data-tax="labor">근로소득세</button>
+            <button class="tax-btn" data-tax="tax">종합소득세(간편)</button>
+            <button class="tax-btn" data-tax="refund">환급/추가 납부</button>
+            <button class="tax-btn" data-tax="corporate">법인세</button>
+            <button class="tax-btn" data-tax="sole">개인사업자 소득세</button>
+          </div>
+          <div class="grid tax-grid">
+            <div class="card" data-tax="vat">
+              <h2>부가세 계산</h2>
+              <p class="muted">매출/매입 기준으로 부가세를 계산합니다.</p>
+              <form class="form" data-endpoint="/api/calc/vat">
+                <div class="field">
+                  <label>상호/회사명</label>
+                  <input name="companyName" placeholder="한별상사" />
+                </div>
+                <div class="field">
+                  <label>사업자등록번호</label>
+                  <input name="businessNumber" placeholder="123-45-67890" />
+                </div>
+                <div class="field">
+                  <label>과세 유형</label>
+                  <select name="taxType">
+                    <option value="SOLE">개인사업자</option>
+                    <option value="CORPORATION">법인사업자</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label>업종</label>
+                  <select name="industry">
+                    <option value="RETAIL">도소매업</option>
+                    <option value="FOOD_LODGING">음식/숙박업</option>
+                    <option value="MANUFACTURING_CONSTRUCTION">제조/건설업</option>
+                    <option value="SERVICE">서비스업</option>
+                  </select>
+                </div>
+                <div class="field inline">
+                  <label>간이과세</label>
+                  <input type="checkbox" name="isSimplified" />
+                </div>
+                <div class="divider"></div>
+                <div class="field">
+                  <label>총 매출액</label>
+                  <input name="totalSales" type="number" min="0" />
+                </div>
+                <div class="field">
+                  <label>총 매입액</label>
+                  <input name="totalPurchases" type="number" min="0" />
+                </div>
+                <div class="field">
+                  <label>면세 매출액</label>
+                  <input name="nonTaxableSales" type="number" min="0" />
+                </div>
+                <button class="primary" type="submit">부가세 계산하기</button>
+              </form>
+              <div class="result result-empty">결과가 여기에 표시됩니다.</div>
+            </div>
+
+            <div class="card" data-tax="income">
+              <h2>소득세 계산</h2>
+              <p class="muted">총수입과 공제액을 기준으로 산출합니다.</p>
+              <form class="form" data-endpoint="/api/calc/income">
+                <div class="field">
+                  <label>상호/회사명</label>
+                  <input name="companyName" placeholder="한별상사" />
+                </div>
+                <div class="field">
+                  <label>사업자등록번호</label>
+                  <input name="businessNumber" placeholder="123-45-67890" />
+                </div>
+                <div class="field">
+                  <label>과세 유형</label>
+                  <select name="taxType">
+                    <option value="SOLE">개인사업자</option>
+                    <option value="CORPORATION">법인사업자</option>
+                  </select>
+                </div>
+                <div class="divider"></div>
+                <div class="field">
+                  <label>사업소득</label>
+                  <input name="businessIncome" type="number" min="0" />
+                </div>
+                <div class="field">
+                  <label>기타소득</label>
+                  <input name="otherIncome" type="number" min="0" />
+                </div>
+                <div class="field">
+                  <label>양도소득</label>
+                  <input name="capitalGains" type="number" min="0" />
+                </div>
+                <div class="field">
+                  <label>이자소득</label>
+                  <input name="interestIncome" type="number" min="0" />
+                </div>
+                <div class="field">
+                  <label>배당소득</label>
+                  <input name="dividendIncome" type="number" min="0" />
+                </div>
+                <div class="divider"></div>
+                <div class="field">
+                  <label>보험료</label>
+                  <input name="insurance" type="number" min="0" />
+                </div>
+                <div class="field">
+                  <label>의료비</label>
+                  <input name="medical" type="number" min="0" />
+                </div>
+                <div class="field">
+                  <label>교육비</label>
+                  <input name="education" type="number" min="0" />
+                </div>
+                <div class="field">
+                  <label>기부금</label>
+                  <input name="donation" type="number" min="0" />
+                </div>
+                <div class="field">
+                  <label>연금저축</label>
+                  <input name="retirement" type="number" min="0" />
+                </div>
+                <div class="field">
+                  <label>기타 공제</label>
+                  <input name="other" type="number" min="0" />
+                </div>
+                <button class="primary" type="submit">소득세 계산하기</button>
+              </form>
+              <div class="result result-empty">결과가 여기에 표시됩니다.</div>
+            </div>
+
+            <div class="card" data-tax="labor">
+              <h2>근로소득세 계산</h2>
+              <p class="muted">월 급여 기준 실수령액을 계산합니다.</p>
+              <form class="form" data-endpoint="/api/calc/labor">
+                <div class="field">
+                  <label>상호/회사명</label>
+                  <input name="companyName" placeholder="한별상사" />
+                </div>
+                <div class="field">
+                  <label>사업자등록번호</label>
+                  <input name="businessNumber" placeholder="123-45-67890" />
+                </div>
+                <div class="field">
+                  <label>과세 유형</label>
+                  <select name="taxType">
+                    <option value="SOLE">개인사업자</option>
+                    <option value="CORPORATION">법인사업자</option>
+                  </select>
+                </div>
+                <div class="divider"></div>
+                <div class="field">
+                  <label>월 급여</label>
+                  <input name="monthlySalary" type="number" min="0" />
+                </div>
+                <div class="field">
+                  <label>상여금</label>
+                  <input name="bonus" type="number" min="0" />
+                </div>
+                <div class="field">
+                  <label>비과세 수당</label>
+                  <input name="nonTaxableAllowance" type="number" min="0" />
+                </div>
+                <div class="divider"></div>
+                <div class="field">
+                  <label>4대보험 공제</label>
+                  <input name="insurance" type="number" min="0" />
+                </div>
+                <div class="field">
+                  <label>의료비 공제</label>
+                  <input name="medical" type="number" min="0" />
+                </div>
+                <div class="field">
+                  <label>교육비 공제</label>
+                  <input name="education" type="number" min="0" />
+                </div>
+                <div class="field">
+                  <label>기타 공제</label>
+                  <input name="other" type="number" min="0" />
+                </div>
+                <button class="primary" type="submit">근로소득세 계산하기</button>
+              </form>
+              <div class="result result-empty">결과가 여기에 표시됩니다.</div>
+            </div>
+
+            <div class="card" data-tax="tax">
+              <h2>종합소득세(간편)</h2>
+              <p class="muted">총소득과 공제액으로 간편 계산합니다.</p>
+              <form class="form" data-endpoint="/api/calc/tax">
+                <div class="field">
+                  <label>총소득</label>
+                  <input name="totalIncome" type="number" min="0" />
+                </div>
+                <div class="divider"></div>
+                <div class="field">
+                  <label>보험료</label>
+                  <input name="insurance" type="number" min="0" />
+                </div>
+                <div class="field">
+                  <label>의료비</label>
+                  <input name="medical" type="number" min="0" />
+                </div>
+                <div class="field">
+                  <label>교육비</label>
+                  <input name="education" type="number" min="0" />
+                </div>
+                <div class="field">
+                  <label>기부금</label>
+                  <input name="donation" type="number" min="0" />
+                </div>
+                <div class="field">
+                  <label>연금저축</label>
+                  <input name="retirement" type="number" min="0" />
+                </div>
+                <div class="field">
+                  <label>기타 공제</label>
+                  <input name="other" type="number" min="0" />
+                </div>
+                <button class="primary" type="submit">종합소득세 계산하기</button>
+              </form>
+              <div class="result result-empty">결과가 여기에 표시됩니다.</div>
+            </div>
+
+            <div class="card" data-tax="refund">
+              <h2>환급/추가 납부 계산</h2>
+              <p class="muted">기납부세액과 비교해 환급 여부를 확인합니다.</p>
+              <form class="form" data-endpoint="/api/calc/refund">
+                <div class="field">
+                  <label>상호/회사명</label>
+                  <input name="companyName" placeholder="한별상사" />
+                </div>
+                <div class="field">
+                  <label>사업자등록번호</label>
+                  <input name="businessNumber" placeholder="123-45-67890" />
+                </div>
+                <div class="field">
+                  <label>과세 유형</label>
+                  <select name="taxType">
+                    <option value="SOLE">개인사업자</option>
+                    <option value="CORPORATION">법인사업자</option>
+                  </select>
+                </div>
+                <div class="divider"></div>
+                <div class="field">
+                  <label>총소득</label>
+                  <input name="totalIncome" type="number" min="0" />
+                </div>
+                <div class="field">
+                  <label>기납부세액</label>
+                  <input name="paidTax" type="number" min="0" />
+                </div>
+                <div class="divider"></div>
+                <div class="field">
+                  <label>보험료</label>
+                  <input name="insurance" type="number" min="0" />
+                </div>
+                <div class="field">
+                  <label>의료비</label>
+                  <input name="medical" type="number" min="0" />
+                </div>
+                <div class="field">
+                  <label>교육비</label>
+                  <input name="education" type="number" min="0" />
+                </div>
+                <div class="field">
+                  <label>기부금</label>
+                  <input name="donation" type="number" min="0" />
+                </div>
+                <div class="field">
+                  <label>연금저축</label>
+                  <input name="retirement" type="number" min="0" />
+                </div>
+                <div class="field">
+                  <label>기타 공제</label>
+                  <input name="other" type="number" min="0" />
+                </div>
+                <button class="primary" type="submit">환급 여부 계산하기</button>
+              </form>
+              <div class="result result-empty">결과가 여기에 표시됩니다.</div>
+            </div>
+
+            <div class="card" data-tax="corporate">
+              <h2>법인세 계산</h2>
+              <p class="muted">법인 소득 및 공제 기준으로 계산합니다.</p>
+              <form class="form" data-endpoint="/api/calc/corporate">
+                <div class="field">
+                  <label>법인명</label>
+                  <input name="companyName" placeholder="한별상사" />
+                </div>
+                <div class="field">
+                  <label>사업자등록번호</label>
+                  <input name="businessNumber" placeholder="123-45-67890" />
+                </div>
+                <div class="divider"></div>
+                <div class="field">
+                  <label>사업소득</label>
+                  <input name="businessIncome" type="number" min="0" />
+                </div>
+                <div class="field">
+                  <label>기타소득</label>
+                  <input name="otherIncome" type="number" min="0" />
+                </div>
+                <div class="field">
+                  <label>양도소득</label>
+                  <input name="capitalGains" type="number" min="0" />
+                </div>
+                <div class="field">
+                  <label>이자소득</label>
+                  <input name="interestIncome" type="number" min="0" />
+                </div>
+                <div class="field">
+                  <label>배당소득</label>
+                  <input name="dividendIncome" type="number" min="0" />
+                </div>
+                <div class="divider"></div>
+                <div class="field">
+                  <label>보험료</label>
+                  <input name="insurance" type="number" min="0" />
+                </div>
+                <div class="field">
+                  <label>의료비</label>
+                  <input name="medical" type="number" min="0" />
+                </div>
+                <div class="field">
+                  <label>교육비</label>
+                  <input name="education" type="number" min="0" />
+                </div>
+                <div class="field">
+                  <label>기부금</label>
+                  <input name="donation" type="number" min="0" />
+                </div>
+                <div class="field">
+                  <label>연금저축</label>
+                  <input name="retirement" type="number" min="0" />
+                </div>
+                <div class="field">
+                  <label>기타 공제</label>
+                  <input name="other" type="number" min="0" />
+                </div>
+                <button class="primary" type="submit">법인세 계산하기</button>
+              </form>
+              <div class="result result-empty">결과가 여기에 표시됩니다.</div>
+            </div>
+
+            <div class="card" data-tax="sole">
+              <h2>개인사업자 소득세</h2>
+              <p class="muted">개인사업자 소득 및 공제 기준으로 계산합니다.</p>
+              <form class="form" data-endpoint="/api/calc/sole">
+                <div class="field">
+                  <label>상호/회사명</label>
+                  <input name="companyName" placeholder="한별상사" />
+                </div>
+                <div class="field">
+                  <label>사업자등록번호</label>
+                  <input name="businessNumber" placeholder="123-45-67890" />
+                </div>
+                <div class="divider"></div>
+                <div class="field">
+                  <label>사업소득</label>
+                  <input name="businessIncome" type="number" min="0" />
+                </div>
+                <div class="field">
+                  <label>기타소득</label>
+                  <input name="otherIncome" type="number" min="0" />
+                </div>
+                <div class="field">
+                  <label>양도소득</label>
+                  <input name="capitalGains" type="number" min="0" />
+                </div>
+                <div class="field">
+                  <label>이자소득</label>
+                  <input name="interestIncome" type="number" min="0" />
+                </div>
+                <div class="field">
+                  <label>배당소득</label>
+                  <input name="dividendIncome" type="number" min="0" />
+                </div>
+                <div class="divider"></div>
+                <div class="field">
+                  <label>보험료</label>
+                  <input name="insurance" type="number" min="0" />
+                </div>
+                <div class="field">
+                  <label>의료비</label>
+                  <input name="medical" type="number" min="0" />
+                </div>
+                <div class="field">
+                  <label>교육비</label>
+                  <input name="education" type="number" min="0" />
+                </div>
+                <div class="field">
+                  <label>기부금</label>
+                  <input name="donation" type="number" min="0" />
+                </div>
+                <div class="field">
+                  <label>연금저축</label>
+                  <input name="retirement" type="number" min="0" />
+                </div>
+                <div class="field">
+                  <label>기타 공제</label>
+                  <input name="other" type="number" min="0" />
+                </div>
+                <button class="primary" type="submit">개인사업자 소득세 계산하기</button>
+              </form>
+              <div class="result result-empty">결과가 여기에 표시됩니다.</div>
+            </div>
+          </div>
+        </section>
+</main>
+    </div>
+    <script>
+      window.API_BASE = 'https://af6ur5mq4e.execute-api.ap-northeast-2.amazonaws.com';
+    </script>
+    <script src="/app.js"></script>
+  </body>
+</html>

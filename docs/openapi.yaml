@@ -1,0 +1,238 @@
+﻿openapi: 3.0.3
+info:
+  title: Tax Assistant API
+  version: 1.0.0
+  description: API for tax calculation endpoints.
+servers:
+  - url: /api
+paths:
+  /calc/vat:
+    post:
+      summary: Calculate VAT
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VatRequest'
+      responses:
+        '200':
+          description: VAT calculation result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StandardResponse'
+  /calc/income:
+    post:
+      summary: Calculate income tax
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IncomeRequest'
+      responses:
+        '200':
+          description: Income tax calculation result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StandardResponse'
+  /calc/labor:
+    post:
+      summary: Calculate labor income tax
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LaborRequest'
+      responses:
+        '200':
+          description: Labor income tax calculation result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StandardResponse'
+  /calc/tax:
+    post:
+      summary: Calculate simple income tax
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SimpleTaxRequest'
+      responses:
+        '200':
+          description: Simple income tax result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StandardResponse'
+  /calc/refund:
+    post:
+      summary: Calculate refund or additional payment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefundRequest'
+      responses:
+        '200':
+          description: Refund calculation result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StandardResponse'
+  /calc/corporate:
+    post:
+      summary: Calculate corporate tax
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IncomeRequest'
+      responses:
+        '200':
+          description: Corporate tax calculation result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StandardResponse'
+  /calc/sole:
+    post:
+      summary: Calculate sole proprietor income tax
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IncomeRequest'
+      responses:
+        '200':
+          description: Sole proprietor income tax calculation result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StandardResponse'
+components:
+  schemas:
+    StandardResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+    BusinessInfo:
+      type: object
+      properties:
+        companyName:
+          type: string
+        businessNumber:
+          type: string
+        taxType:
+          type: string
+          enum: [SOLE, CORPORATION]
+        isSimplified:
+          type: boolean
+        industry:
+          type: string
+          enum: [RETAIL, FOOD_LODGING, MANUFACTURING_CONSTRUCTION, SERVICE]
+    SalesInfo:
+      type: object
+      properties:
+        totalSales:
+          type: number
+        totalPurchases:
+          type: number
+        nonTaxableSales:
+          type: number
+    IncomeInfo:
+      type: object
+      properties:
+        businessIncome:
+          type: number
+        otherIncome:
+          type: number
+        capitalGains:
+          type: number
+        interestIncome:
+          type: number
+        dividendIncome:
+          type: number
+    SalaryInfo:
+      type: object
+      properties:
+        monthlySalary:
+          type: number
+        bonus:
+          type: number
+        nonTaxableAllowance:
+          type: number
+    Deductions:
+      type: object
+      properties:
+        insurance:
+          type: number
+        medical:
+          type: number
+        education:
+          type: number
+        donation:
+          type: number
+        retirement:
+          type: number
+        other:
+          type: number
+    VatRequest:
+      type: object
+      properties:
+        businessInfo:
+          $ref: '#/components/schemas/BusinessInfo'
+        salesInfo:
+          $ref: '#/components/schemas/SalesInfo'
+      required: [businessInfo, salesInfo]
+    IncomeRequest:
+      type: object
+      properties:
+        businessInfo:
+          $ref: '#/components/schemas/BusinessInfo'
+        incomeInfo:
+          $ref: '#/components/schemas/IncomeInfo'
+        deductions:
+          $ref: '#/components/schemas/Deductions'
+      required: [businessInfo, incomeInfo, deductions]
+    LaborRequest:
+      type: object
+      properties:
+        businessInfo:
+          $ref: '#/components/schemas/BusinessInfo'
+        salaryInfo:
+          $ref: '#/components/schemas/SalaryInfo'
+        deductions:
+          $ref: '#/components/schemas/Deductions'
+      required: [businessInfo, salaryInfo, deductions]
+    SimpleTaxRequest:
+      type: object
+      properties:
+        income:
+          type: number
+        deductions:
+          $ref: '#/components/schemas/Deductions'
+      required: [income]
+    RefundRequest:
+      type: object
+      properties:
+        businessInfo:
+          $ref: '#/components/schemas/BusinessInfo'
+        income:
+          type: number
+        paidTax:
+          type: number
+        deductions:
+          $ref: '#/components/schemas/Deductions'
+      required: [businessInfo, income, paidTax]

@@ -1,0 +1,60 @@
+﻿service: tax-assistant-service
+
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  region: ap-northeast-2
+  stage: ${opt:stage, 'dev'}
+  environment:
+    NODE_OPTIONS: --enable-source-maps
+
+functions:
+  calcVat:
+    handler: src/index.calcVat
+    events:
+      - httpApi:
+          path: /calc/vat
+          method: post
+  calcIncome:
+    handler: src/index.calcIncome
+    events:
+      - httpApi:
+          path: /calc/income
+          method: post
+  calcLabor:
+    handler: src/index.calcLabor
+    events:
+      - httpApi:
+          path: /calc/labor
+          method: post
+  calcTax:
+    handler: src/index.calcTax
+    events:
+      - httpApi:
+          path: /calc/tax
+          method: post
+  calcRefund:
+    handler: src/index.calcRefund
+    events:
+      - httpApi:
+          path: /calc/refund
+          method: post
+  calcCorporate:
+    handler: src/index.calcCorporate
+    events:
+      - httpApi:
+          path: /calc/corporate
+          method: post
+  calcSole:
+    handler: src/index.calcSole
+    events:
+      - httpApi:
+          path: /calc/sole
+          method: post
+
+package:
+  patterns:
+    - '!node_modules/aws-sdk/**'
+    - '!certs/**'
